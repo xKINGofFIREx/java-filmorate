@@ -1,18 +1,20 @@
 *.class
 *.log
-*.jar
 *.war
 *.nar
+*.jar
 *.ear
 *.zip
 *.tar.gz
 *.rar
+*.DS_Store
+*.mvn
 hs_err_pid*
 out/
 target/
-!.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+checkstyle.xml
 
 ### STS ###
 .apt_generated
@@ -44,3 +46,4 @@ build/
 
 *.db
 db/*
+/.github/
