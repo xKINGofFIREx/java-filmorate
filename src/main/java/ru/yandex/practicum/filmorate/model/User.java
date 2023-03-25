@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Data
 public class User {
 
-    private int id = 0;
+    private int id = 1;
 
     @Email
     @NotNull
@@ -27,5 +27,4 @@ public class User {
     @NotNull
     @Past
     private LocalDate birthday;
-
 }

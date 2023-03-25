@@ -7,7 +7,8 @@ import java.time.LocalDate;
 
 @Data
 public class Film {
-    private int id = 0;
+
+    private int id = 1;
 
     @NotNull
     @NotEmpty
@@ -23,4 +24,5 @@ public class Film {
 
     @Positive
     private int duration;
+
 }

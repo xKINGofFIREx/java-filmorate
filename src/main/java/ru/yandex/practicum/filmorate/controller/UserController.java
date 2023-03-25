@@ -16,7 +16,7 @@ import java.util.Map;
 @RequestMapping("/users")
 public class UserController {
 
-    private static int idCount = 1;
+    private static int ids = 1;
     private final Map<Integer, User> users = new HashMap<>();
 
     @GetMapping
@@ -25,14 +25,13 @@ public class UserController {
     }
 
     @PostMapping
-    public User create(@Valid @RequestBody User user) throws ValidationException {
+    public User create(@Valid @RequestBody User user) {
 
         if (users.containsKey(user.getId()))
-            throw new ValidationException("пользователь уже существует");
+            user.setId(++ids);
+
         if (user.getName().equals(""))
             user.setName(user.getLogin());
-        if (user.getId() == 0)
-            user.setId(idCount++);
 
         users.put(user.getId(), user);
 
@@ -42,12 +41,11 @@ public class UserController {
 
     @PutMapping
     public User update(@Valid @RequestBody User user) throws ValidationException {
+
         if (!users.containsKey(user.getId()))
             throw new ValidationException("пользователя не существует");
         if (user.getName().equals(""))
             user.setName(user.getLogin());
-        if (user.getId() == 0)
-            user.setId(idCount++);
 
         users.put(user.getId(), user);
 

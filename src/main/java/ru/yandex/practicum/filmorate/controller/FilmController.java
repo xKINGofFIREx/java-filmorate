@@ -17,7 +17,6 @@ import java.util.Map;
 @RequestMapping("/films")
 public class FilmController {
 
-    private static int idCount = 1;
     private final Map<Integer, Film> films = new HashMap<>();
 
     @GetMapping
@@ -28,12 +27,8 @@ public class FilmController {
     @PostMapping
     public Film create(@Valid @RequestBody Film film) throws ValidationException {
 
-        if (films.containsKey(film.getId()))
-            throw new ValidationException("фильм уже существует");
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28)))
             throw new ValidationException("дата релиза — не может быть раньше 28.12.1985");
-        if (film.getId() == 0)
-            film.setId(idCount++);
 
         films.put(film.getId(), film);
 
@@ -42,12 +37,11 @@ public class FilmController {
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) throws ValidationException {
+
         if (!films.containsKey(film.getId()))
             throw new ValidationException("фильма не существует");
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28)))
             throw new ValidationException("дата релиза — не может быть раньше 28.12.1985");
-        if (film.getId() == 0)
-            film.setId(idCount++);
 
         films.put(film.getId(), film);
 
