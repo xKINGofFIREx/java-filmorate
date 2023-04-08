@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,9 +20,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film create(Film film) throws ValidationException {
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28)))
-            throw new ValidationException("дата релиза — не может быть раньше 28.12.1985");
+    public Film create(Film film) {
 
         if (films.containsKey(film.getId()))
             film.setId(++ids);
@@ -37,8 +34,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film update(Film film) throws ValidationException {
         if (!films.containsKey(film.getId()))
             throw new ValidationException("фильма не существует");
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28)))
-            throw new ValidationException("дата релиза — не может быть раньше 28.12.1985");
 
         films.put(film.getId(), film);
 

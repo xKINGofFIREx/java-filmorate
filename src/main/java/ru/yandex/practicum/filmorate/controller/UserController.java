@@ -31,12 +31,18 @@ public class UserController {
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
+        if (user.getName().equals(""))
+            user.setName(user.getLogin());
+
         return userService.create(user);
     }
 
 
     @PutMapping
     public User update(@Valid @RequestBody User user) throws ValidationException {
+        if (user.getName().equals(""))
+            user.setName(user.getLogin());
+
         return userService.update(user);
     }
 

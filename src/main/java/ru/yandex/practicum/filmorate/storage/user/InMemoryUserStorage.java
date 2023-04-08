@@ -24,9 +24,6 @@ public class InMemoryUserStorage implements UserStorage {
         if (users.containsKey(user.getId()))
             user.setId(++ids);
 
-        if (user.getName().equals(""))
-            user.setName(user.getLogin());
-
         users.put(user.getId(), user);
 
         return user;
@@ -36,8 +33,6 @@ public class InMemoryUserStorage implements UserStorage {
     public User update(User user) throws ValidationException {
         if (!users.containsKey(user.getId()))
             throw new ValidationException("пользователя не существует");
-        if (user.getName().equals(""))
-            user.setName(user.getLogin());
 
         users.put(user.getId(), user);
 
@@ -52,6 +47,7 @@ public class InMemoryUserStorage implements UserStorage {
     public User getUser(long id) throws ValidationException {
         if (!users.containsKey(id))
             throw new ValidationException("");
+
         return users.get(id);
     }
 }

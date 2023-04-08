@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,11 +33,17 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) throws ValidationException {
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28)))
+            throw new ValidationException("дата релиза — не может быть раньше 28.12.1985");
+
         return filmService.create(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) throws ValidationException {
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28)))
+            throw new ValidationException("дата релиза — не может быть раньше 28.12.1985");
+
         return filmService.update(film);
     }
 
