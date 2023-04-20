@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -15,6 +16,7 @@ public class User {
 
     private final Set<Long> friends = new HashSet<>();
     private long id = 1;
+    private final Map<Long, Boolean> friendShipStatus;
 
     @Email
     @NotNull

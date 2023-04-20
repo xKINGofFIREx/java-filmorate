@@ -13,6 +13,9 @@ public class Film {
     private Set<Long> likes = new HashSet<>();
     private long id = 1;
 
+    private Set<String> genre;
+    private MPA mpa;
+
     @NotNull
     @NotEmpty
     private String name = "common";
