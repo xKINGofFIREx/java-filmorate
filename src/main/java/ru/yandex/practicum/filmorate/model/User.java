@@ -17,7 +17,7 @@ public class User {
 
     private final Set<Long> friends = new HashSet<>();
     private long id = 1;
-    private final Map<Long, Boolean> friendShipStatus = new HashMap<>();
+    private final Map<Long, Boolean> friendshipStatus = new HashMap<>();
 
     @Email
     @NotNull
