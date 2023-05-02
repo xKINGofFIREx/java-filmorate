@@ -39,11 +39,17 @@ public class UserController {
 
 
     @PutMapping
-    public User update(@Valid @RequestBody User user) throws ValidationException {
+    public User update(@Valid @RequestBody User user) {
         if (user.getName().equals(""))
             user.setName(user.getLogin());
 
-        return userService.update(user);
+        try {
+            user = userService.update(user);
+        } catch (ValidationException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "");
+        }
+
+        return user;
     }
 
     @DeleteMapping("/{userId}")

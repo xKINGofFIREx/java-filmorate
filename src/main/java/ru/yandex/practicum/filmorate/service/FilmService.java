@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -17,7 +18,7 @@ public class FilmService {
     private final FilmStorage filmStorage;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage) {
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
     }
 
@@ -69,7 +70,7 @@ public class FilmService {
     }
 
     private List<Film> topFilms(int count) {
-        TreeSet<Film> films = new TreeSet<>(Comparator.comparing(Film::getLikes).thenComparing(Film::getId).reversed());
+        TreeSet<Film> films = new TreeSet<>(Comparator.comparing(Film::getLikeAmount).thenComparing(Film::getId).reversed());
         films.addAll(((InMemoryFilmStorage) filmStorage).findAll());
         List<Film> sortedFilms = new ArrayList<>(films);
 

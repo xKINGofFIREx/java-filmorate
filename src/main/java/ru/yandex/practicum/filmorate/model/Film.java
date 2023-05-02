@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.*;
@@ -8,6 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@Builder
 public class Film {
 
     private Set<Long> likes = new HashSet<>();
@@ -39,11 +41,7 @@ public class Film {
         likes.remove(userId);
     }
 
-    public long getLikes() {
+    public int getLikeAmount() {
         return likes.size();
-    }
-
-    public Set<Long> getLike() {
-        return likes;
     }
 }

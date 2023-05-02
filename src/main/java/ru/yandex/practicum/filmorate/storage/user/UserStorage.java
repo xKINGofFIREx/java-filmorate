@@ -8,5 +8,5 @@ public interface UserStorage {
 
     User update(User user) throws ValidationException;
 
-    void delete(long filmId);
+    void delete(long userId);
 }
