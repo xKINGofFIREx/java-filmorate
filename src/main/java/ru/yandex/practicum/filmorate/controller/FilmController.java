@@ -35,7 +35,7 @@ public class FilmController {
     @PostMapping("/films")
     public Film create(@Valid @RequestBody Film film) throws ValidationException {
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28)))
-          throw new ValidationException("дата релиза — не может быть раньше 28.12.1895");
+            throw new ValidationException("дата релиза — не может быть раньше 28.12.1895");
 
         return filmService.create(film);
     }
@@ -103,7 +103,7 @@ public class FilmController {
     @GetMapping("/genres/{genreId}")
     public Genre getGenreById(@PathVariable int genreId) {
         Genre genre;
-        try{
+        try {
             genre = filmService.getGenreById(genreId);
         } catch (ValidationException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -119,7 +119,7 @@ public class FilmController {
     @GetMapping("/mpa/{mpaId}")
     public MPA getMPAById(@PathVariable int mpaId) {
         MPA mpa;
-        try{
+        try {
             mpa = filmService.getMPAById(mpaId);
         } catch (ValidationException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
