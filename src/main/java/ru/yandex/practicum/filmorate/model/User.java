@@ -15,7 +15,7 @@ import java.util.*;
 public class User {
 
     private final Set<Long> friends = new HashSet<>();
-    private long id = 1;
+    private long id;
     private final Map<Long, Boolean> friendshipStatus = new HashMap<>();
 
     @Email
@@ -27,7 +27,7 @@ public class User {
     private String login;
 
     @NotNull
-    private String name = "";
+    private String name;
 
     @NotNull
     @Past

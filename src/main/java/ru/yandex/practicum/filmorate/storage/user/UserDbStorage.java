@@ -56,6 +56,7 @@ public class UserDbStorage implements UserStorage {
                 user.getName(),
                 user.getBirthday(),
                 user.getId());
+
         return user;
     }
 
@@ -124,7 +125,9 @@ public class UserDbStorage implements UserStorage {
 
         User user = findOne(userId);
 
-        jdbcTemplate.update("INSERT INTO FRIEND(USER_ID, FRIEND_ID) VALUES (?, ?) ", userId, friendId);
+        if (!user.getFriends().contains(friendId)) {
+            jdbcTemplate.update("INSERT INTO FRIEND(USER_ID, FRIEND_ID) VALUES (?, ?) ", userId, friendId);
+        }
 
         user.addFriend(friendId);
     }

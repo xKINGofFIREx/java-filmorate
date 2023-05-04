@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
@@ -16,7 +18,6 @@ import java.util.Optional;
 
 @Slf4j
 @RestController
-@RequestMapping("/films")
 public class FilmController {
 
     private final FilmService filmService;
@@ -26,28 +27,34 @@ public class FilmController {
         this.filmService = filmService;
     }
 
-    @GetMapping
+    @GetMapping("/films")
     public List<Film> findAll() {
         return filmService.findAll();
     }
 
-    @PostMapping
+    @PostMapping("/films")
     public Film create(@Valid @RequestBody Film film) throws ValidationException {
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28)))
-            throw new ValidationException("дата релиза — не может быть раньше 28.12.1985");
+          throw new ValidationException("дата релиза — не может быть раньше 28.12.1895");
 
         return filmService.create(film);
     }
 
-    @PutMapping
+    @PutMapping("/films")
     public Film update(@Valid @RequestBody Film film) throws ValidationException {
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28)))
             throw new ValidationException("дата релиза — не может быть раньше 28.12.1985");
 
-        return filmService.update(film);
+        try {
+            filmService.update(film);
+        } catch (ValidationException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        return film;
     }
 
-    @GetMapping("/{filmId}")
+    @GetMapping("/films/{filmId}")
     public Film getFilm(@PathVariable long filmId) {
         Film film;
         try {
@@ -58,12 +65,12 @@ public class FilmController {
         return film;
     }
 
-    @DeleteMapping("/{filmId}")
+    @DeleteMapping("/films/{filmId}")
     public void delete(@PathVariable long filmId) throws ValidationException {
         filmService.delete(filmId);
     }
 
-    @PutMapping("/{filmId}/like/{userId}")
+    @PutMapping("/films/{filmId}/like/{userId}")
     public void addLike(@PathVariable long filmId, @PathVariable long userId) {
         try {
             filmService.addLike(filmId, userId);
@@ -73,7 +80,7 @@ public class FilmController {
 
     }
 
-    @DeleteMapping("/{filmId}/like/{userId}")
+    @DeleteMapping("/films/{filmId}/like/{userId}")
     public void removeLike(@PathVariable long filmId, @PathVariable long userId) {
         try {
             filmService.removeLike(filmId, userId);
@@ -83,9 +90,41 @@ public class FilmController {
 
     }
 
-    @GetMapping("/popular")
+    @GetMapping("/films/popular")
     public List<Film> getTopFilms(@RequestParam Optional<Integer> count) {
         return filmService.getTopFilms(count.orElse(-1));
+    }
+
+    @GetMapping("/genres")
+    public List<Genre> getGenreList() {
+        return filmService.getGenreList();
+    }
+
+    @GetMapping("/genres/{genreId}")
+    public Genre getGenreById(@PathVariable int genreId) {
+        Genre genre;
+        try{
+            genre = filmService.getGenreById(genreId);
+        } catch (ValidationException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return genre;
+    }
+
+    @GetMapping("/mpa")
+    public List<MPA> getMPAList() {
+        return filmService.getMPAList();
+    }
+
+    @GetMapping("/mpa/{mpaId}")
+    public MPA getMPAById(@PathVariable int mpaId) {
+        MPA mpa;
+        try{
+            mpa = filmService.getMPAById(mpaId);
+        } catch (ValidationException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return mpa;
     }
 
 }

@@ -5,6 +5,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
@@ -23,7 +26,7 @@ public class FilmService {
     }
 
     public List<Film> findAll() {
-        return ((InMemoryFilmStorage) filmStorage).findAll();
+        return ((FilmDbStorage) filmStorage).findAll();
     }
 
     public Film create(Film film) throws ValidationException {
@@ -44,7 +47,7 @@ public class FilmService {
         if (userId < 1 || filmId < 1)
             throw new ValidationException("");
 
-        Film film = ((InMemoryFilmStorage) filmStorage).getFilm(filmId);
+        Film film = ((FilmDbStorage) filmStorage).getFilm(filmId);
 
         film.addLike(userId);
     }
@@ -53,7 +56,7 @@ public class FilmService {
         if (userId < 1 || filmId < 1)
             throw new ValidationException("");
 
-        Film film = ((InMemoryFilmStorage) filmStorage).getFilm(filmId);
+        Film film = ((FilmDbStorage) filmStorage).getFilm(filmId);
 
         film.removeLike(userId);
     }
@@ -66,18 +69,36 @@ public class FilmService {
     }
 
     public Film getFilm(long id) throws ValidationException {
-        return ((InMemoryFilmStorage) filmStorage).getFilm(id);
+        return ((FilmDbStorage) filmStorage).getFilm(id);
     }
 
     private List<Film> topFilms(int count) {
         TreeSet<Film> films = new TreeSet<>(Comparator.comparing(Film::getLikeAmount).thenComparing(Film::getId).reversed());
-        films.addAll(((InMemoryFilmStorage) filmStorage).findAll());
+        films.addAll(((FilmDbStorage) filmStorage).findAll());
         List<Film> sortedFilms = new ArrayList<>(films);
 
         if (count > sortedFilms.size())
             count = sortedFilms.size();
 
         return sortedFilms.subList(0, count);
+    }
+
+    public List<Genre> getGenreList() {
+        return ((FilmDbStorage) filmStorage).getGenreList();
+    }
+
+    public Genre getGenreById(long genreId) throws ValidationException {
+        return ((FilmDbStorage) filmStorage).getGenreById(genreId);
+    }
+
+    public List<MPA> getMPAList() {
+        return ((FilmDbStorage) filmStorage).getMPAList();
+    }
+
+    public MPA getMPAById(long mpaId) throws ValidationException {
+        if (mpaId > 5)
+            throw new ValidationException("");
+        return ((FilmDbStorage) filmStorage).getMPAById(mpaId);
     }
 
 
