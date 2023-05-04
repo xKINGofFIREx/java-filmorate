@@ -78,7 +78,7 @@ public class UserDbStorage implements UserStorage {
         return users;
     }
 
-    public User findOne(long userId){
+    public User findOne(long userId) {
         String sql = "SELECT USER_ID, EMAIL, LOGIN, NAME, BIRTHDAY " +
                 "FROM PUBLIC.USER_DATA WHERE USER_ID = ?";
 
@@ -147,6 +147,6 @@ public class UserDbStorage implements UserStorage {
     }
 
     private boolean isExist(String sql, long id) {
-        return jdbcTemplate.queryForObject(sql, new Object[] {id}, Integer.class) != 0;
+        return jdbcTemplate.queryForObject(sql, new Object[]{id}, Integer.class) != 0;
     }
 }
