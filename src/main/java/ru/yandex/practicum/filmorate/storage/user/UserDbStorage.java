@@ -3,12 +3,12 @@ package ru.yandex.practicum.filmorate.storage.user;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -39,7 +39,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User update(User user) throws ValidationException {
+    public User update(User user) throws NotFoundException {
         String sql = "UPDATE PUBLIC.USER_DATA SET " +
                 "EMAIL = ?, LOGIN = ?, NAME = ?, BIRTHDAY = ? " +
                 "WHERE USER_ID = ?";
@@ -47,7 +47,7 @@ public class UserDbStorage implements UserStorage {
         String exist = "SELECT COUNT(*) FROM USER_DATA WHERE USER_ID = ?";
 
         if (!isExist(exist, user.getId())) {
-            throw new ValidationException("");
+            throw new NotFoundException();
         }
 
         jdbcTemplate.update(sql,
@@ -67,27 +67,31 @@ public class UserDbStorage implements UserStorage {
     }
 
     public List<User> findAll() {
-        String sql = "SELECT COUNT(*) FROM USER_DATA WHERE USER_ID = ?";
-        List<User> users = new ArrayList<>();
+        String sql = "SELECT * FROM USER_DATA";
 
-        for (long i = 1; i <= ids; i++) {
-            if (isExist(sql, i)) {
-                users.add(findOne(i));
-            }
-        }
-        return users;
+        return jdbcTemplate.query(sql, this::mapRowToUser);
     }
 
     public User findOne(long userId) {
         String sql = "SELECT USER_ID, EMAIL, LOGIN, NAME, BIRTHDAY " +
                 "FROM PUBLIC.USER_DATA WHERE USER_ID = ?";
 
-        User user = jdbcTemplate.queryForObject(sql, this::mapRowToUser, userId);
+        return jdbcTemplate.queryForObject(sql, this::mapRowToUser, userId);
+    }
+
+    private User mapRowToUser(ResultSet resultSet, int rowNumber) throws SQLException {
+        User user = User.builder()
+                .id(resultSet.getLong("USER_ID"))
+                .email(resultSet.getString("EMAIL"))
+                .login(resultSet.getString("LOGIN"))
+                .name(resultSet.getString("NAME"))
+                .birthday(resultSet.getDate("BIRTHDAY").toLocalDate())
+                .build();
 
         List<Long> friends = jdbcTemplate.query("SELECT * FROM FRIEND WHERE USER_ID = ?",
-                (rs, rowNum) -> rs.getLong("FRIEND_ID"), userId);
+                (rs, rowNum) -> rs.getLong("FRIEND_ID"), user.getId());
 
-        if (!friends.isEmpty() && user != null) {
+        if (!friends.isEmpty()) {
             for (long i : friends) {
                 user.addFriend(i);
             }
@@ -96,31 +100,21 @@ public class UserDbStorage implements UserStorage {
         return user;
     }
 
-    private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
-        return User.builder()
-                .id(resultSet.getLong("USER_ID"))
-                .email(resultSet.getString("EMAIL"))
-                .login(resultSet.getString("LOGIN"))
-                .name(resultSet.getString("NAME"))
-                .birthday(resultSet.getDate("BIRTHDAY").toLocalDate())
-                .build();
-    }
-
-    public User getUser(long id) throws ValidationException {
+    public User getUser(long id) throws NotFoundException {
         String sql = "SELECT COUNT(*) FROM USER_DATA WHERE USER_ID = ?";
 
         if (!isExist(sql, id)) {
-            throw new ValidationException("");
+            throw new NotFoundException();
         }
 
         return findOne(id);
     }
 
-    public void addFriend(long userId, long friendId) throws ValidationException {
+    public void addFriend(long userId, long friendId) throws NotFoundException {
         String sql = "SELECT COUNT(*) FROM USER_DATA WHERE USER_ID = ?";
 
         if (!isExist(sql, friendId) || !isExist(sql, userId)) {
-            throw new ValidationException("");
+            throw new NotFoundException();
         }
 
         User user = findOne(userId);

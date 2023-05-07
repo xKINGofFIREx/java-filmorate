@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
@@ -28,7 +29,7 @@ public class UserService {
         return userStorage.create(user);
     }
 
-    public User update(User user) throws ValidationException {
+    public User update(User user) throws NotFoundException {
         return userStorage.update(user);
     }
 
@@ -36,7 +37,7 @@ public class UserService {
         userStorage.delete(userId);
     }
 
-    public void addFriend(long userId, long friendId) throws ValidationException {
+    public void addFriend(long userId, long friendId) throws NotFoundException {
         ((UserDbStorage) userStorage).addFriend(userId, friendId);
     }
 
@@ -44,7 +45,7 @@ public class UserService {
         ((UserDbStorage) userStorage).removeFriend(userId, friendId);
     }
 
-    public List<User> getFriends(long userId) throws ValidationException {
+    public List<User> getFriends(long userId) throws NotFoundException {
         User user = getUserById(userId);
         List<Long> friendsIds = new ArrayList<>(user.getFriends());
         List<User> friends = new ArrayList<>();
@@ -56,7 +57,7 @@ public class UserService {
         return friends;
     }
 
-    public List<User> getCommonFriends(long userId, long otherId) throws ValidationException {
+    public List<User> getCommonFriends(long userId, long otherId) throws NotFoundException {
         User user = getUserById(userId);
         User friend = getUserById(otherId);
 
@@ -71,7 +72,7 @@ public class UserService {
         return commonFriends;
     }
 
-    public User getUserById(long userId) throws ValidationException {
+    public User getUserById(long userId) throws NotFoundException {
         return ((UserDbStorage) userStorage).getUser(userId);
     }
 }

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -47,7 +48,7 @@ public class FilmController {
 
         try {
             filmService.update(film);
-        } catch (ValidationException e) {
+        } catch (NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
@@ -59,14 +60,14 @@ public class FilmController {
         Film film;
         try {
             film = filmService.getFilm(filmId);
-        } catch (ValidationException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "");
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         return film;
     }
 
     @DeleteMapping("/films/{filmId}")
-    public void delete(@PathVariable long filmId) throws ValidationException {
+    public void delete(@PathVariable long filmId) throws NotFoundException {
         filmService.delete(filmId);
     }
 
@@ -74,8 +75,8 @@ public class FilmController {
     public void addLike(@PathVariable long filmId, @PathVariable long userId) {
         try {
             filmService.addLike(filmId, userId);
-        } catch (ValidationException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "");
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
     }
@@ -84,8 +85,8 @@ public class FilmController {
     public void removeLike(@PathVariable long filmId, @PathVariable long userId) {
         try {
             filmService.removeLike(filmId, userId);
-        } catch (ValidationException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "");
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
     }
@@ -105,7 +106,7 @@ public class FilmController {
         Genre genre;
         try {
             genre = filmService.getGenreById(genreId);
-        } catch (ValidationException e) {
+        } catch (NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         return genre;
@@ -121,7 +122,7 @@ public class FilmController {
         MPA mpa;
         try {
             mpa = filmService.getMPAById(mpaId);
-        } catch (ValidationException e) {
+        } catch (NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         return mpa;

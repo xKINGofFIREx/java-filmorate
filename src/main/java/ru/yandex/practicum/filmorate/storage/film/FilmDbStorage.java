@@ -3,14 +3,13 @@ package ru.yandex.practicum.filmorate.storage.film;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -49,7 +48,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film update(Film film) throws ValidationException {
+    public Film update(Film film) throws NotFoundException {
         String sql = "UPDATE PUBLIC.FILM SET " +
                 "NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, MPA_ID = ? " +
                 "WHERE FILM_ID = ?";
@@ -57,7 +56,7 @@ public class FilmDbStorage implements FilmStorage {
         String exist = "SELECT COUNT(*) FROM PUBLIC.FILM WHERE FILM_ID = ?";
 
         if (!isExist(exist, film.getId())) {
-            throw new ValidationException("");
+            throw new NotFoundException();
         }
 
         jdbcTemplate.update(sql,
@@ -82,39 +81,20 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public List<Film> findAll() {
-        String sql = "SELECT COUNT(*) FROM PUBLIC.FILM WHERE FILM_ID = ?";
-        List<Film> films = new ArrayList<>();
+        String sql = "SELECT * FROM PUBLIC.FILM";
 
-        for (long i = 1; i <= ids; i++) {
-            if (isExist(sql, i)) {
-                films.add(findOne(i));
-            }
-        }
-        return films;
+        return jdbcTemplate.query(sql, this::mapRowToFilm);
     }
 
     public Film findOne(long filmId) {
         String sql = "SELECT FILM_ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, MPA_ID " +
                 "FROM PUBLIC.FILM WHERE FILM_ID = ?";
 
-        Film film = jdbcTemplate.queryForObject(sql, this::mapRowToFilm, filmId);
-
-        List<Long> likes = jdbcTemplate.query("SELECT * FROM PUBLIC.LIKES WHERE FILM_ID = ?",
-                (rs, rowNum) -> rs.getLong("USER_ID"), filmId);
-
-        List<Genre> genres = jdbcTemplate.query("SELECT * FROM PUBLIC.GENRE_LIST JOIN GENRE ON GENRE.GENRE_ID = GENRE_LIST.GENRE_ID WHERE FILM_ID = ?",
-                (rs, rowNum) -> new Genre(rs.getInt("GENRE_ID"), rs.getString("GENRE_NAME")), filmId);
-
-        if (film != null) {
-            film.setLikes(likes);
-            film.setGenres(genres);
-        }
-
-        return film;
+        return jdbcTemplate.queryForObject(sql, this::mapRowToFilm, filmId);
     }
 
-    private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
-        return Film.builder()
+    private Film mapRowToFilm(ResultSet resultSet, int rowNumber) throws SQLException {
+        Film film = Film.builder()
                 .id(resultSet.getLong("FILM_ID"))
                 .name(resultSet.getString("NAME"))
                 .description(resultSet.getString("DESCRIPTION"))
@@ -122,13 +102,24 @@ public class FilmDbStorage implements FilmStorage {
                 .duration(resultSet.getInt("DURATION"))
                 .mpa(getMPAById(resultSet.getInt("MPA_ID")))
                 .build();
+
+        List<Long> likes = jdbcTemplate.query("SELECT * FROM PUBLIC.LIKES WHERE FILM_ID = ?",
+                (rs, rowNum) -> rs.getLong("USER_ID"), film.getId());
+
+        List<Genre> genres = jdbcTemplate.query("SELECT * FROM PUBLIC.GENRE_LIST JOIN GENRE ON GENRE.GENRE_ID = GENRE_LIST.GENRE_ID WHERE FILM_ID = ?",
+                (rs, rowNum) -> new Genre(rs.getInt("GENRE_ID"), rs.getString("GENRE_NAME")), film.getId());
+
+        film.setLikes(likes);
+        film.setGenres(genres);
+
+        return film;
     }
 
-    public Film getFilm(long id) throws ValidationException {
+    public Film getFilm(long id) throws NotFoundException {
         String sql = "SELECT COUNT(*) FROM PUBLIC.FILM WHERE FILM_ID = ?";
 
         if (!isExist(sql, id)) {
-            throw new ValidationException("");
+            throw new NotFoundException();
         }
 
         return findOne(id);
@@ -151,11 +142,11 @@ public class FilmDbStorage implements FilmStorage {
                 (rs, rowNum) -> new Genre(rs.getInt("GENRE_ID"), rs.getString("GENRE_NAME")));
     }
 
-    public Genre getGenreById(long genreId) throws ValidationException {
+    public Genre getGenreById(long genreId) throws NotFoundException {
         List<Genre> genres = jdbcTemplate.query("SELECT * FROM PUBLIC.GENRE WHERE GENRE_ID = ?",
                 (rs, rowNum) -> new Genre(rs.getInt("GENRE_ID"), rs.getString("GENRE_NAME")), genreId);
         if (genres.size() == 0) {
-            throw new ValidationException("");
+            throw new NotFoundException();
         }
         return genres.get(0);
     }

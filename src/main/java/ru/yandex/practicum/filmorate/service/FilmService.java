@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -32,28 +33,28 @@ public class FilmService {
         return filmStorage.create(film);
     }
 
-    public Film update(Film film) throws ValidationException {
+    public Film update(Film film) throws NotFoundException {
         return filmStorage.update(film);
     }
 
-    public void delete(long filmId) throws ValidationException {
+    public void delete(long filmId) throws NotFoundException {
         if (filmId < 1)
-            throw new ValidationException("");
+            throw new NotFoundException();
         filmStorage.delete(filmId);
     }
 
-    public void addLike(long filmId, long userId) throws ValidationException {
+    public void addLike(long filmId, long userId) throws NotFoundException {
         if (userId < 1 || filmId < 1)
-            throw new ValidationException("");
+            throw new NotFoundException();
 
         Film film = ((FilmDbStorage) filmStorage).getFilm(filmId);
 
         film.addLike(userId);
     }
 
-    public void removeLike(long filmId, long userId) throws ValidationException {
+    public void removeLike(long filmId, long userId) throws NotFoundException {
         if (userId < 1 || filmId < 1)
-            throw new ValidationException("");
+            throw new NotFoundException();
 
         Film film = ((FilmDbStorage) filmStorage).getFilm(filmId);
 
@@ -67,7 +68,7 @@ public class FilmService {
         return topFilms(count);
     }
 
-    public Film getFilm(long id) throws ValidationException {
+    public Film getFilm(long id) throws NotFoundException {
         return ((FilmDbStorage) filmStorage).getFilm(id);
     }
 
@@ -86,7 +87,7 @@ public class FilmService {
         return ((FilmDbStorage) filmStorage).getGenreList();
     }
 
-    public Genre getGenreById(long genreId) throws ValidationException {
+    public Genre getGenreById(long genreId) throws NotFoundException {
         return ((FilmDbStorage) filmStorage).getGenreById(genreId);
     }
 
@@ -94,9 +95,9 @@ public class FilmService {
         return ((FilmDbStorage) filmStorage).getMPAList();
     }
 
-    public MPA getMPAById(long mpaId) throws ValidationException {
+    public MPA getMPAById(long mpaId) throws NotFoundException {
         if (mpaId > 5)
-            throw new ValidationException("");
+            throw new NotFoundException();
         return ((FilmDbStorage) filmStorage).getMPAById(mpaId);
     }
 
