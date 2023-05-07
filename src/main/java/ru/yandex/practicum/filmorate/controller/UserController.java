@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -39,11 +40,17 @@ public class UserController {
 
 
     @PutMapping
-    public User update(@Valid @RequestBody User user) throws ValidationException {
+    public User update(@Valid @RequestBody User user) {
         if (user.getName().equals(""))
             user.setName(user.getLogin());
 
-        return userService.update(user);
+        try {
+            user = userService.update(user);
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        return user;
     }
 
     @DeleteMapping("/{userId}")
@@ -56,8 +63,8 @@ public class UserController {
         User user;
         try {
             user = userService.getUserById(userId);
-        } catch (ValidationException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "");
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         return user;
     }
@@ -66,8 +73,8 @@ public class UserController {
     public void addFriend(@PathVariable long userId, @PathVariable long friendId) {
         try {
             userService.addFriend(userId, friendId);
-        } catch (ValidationException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "");
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -77,12 +84,12 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/friends")
-    public List<User> getFriends(@PathVariable @Valid long userId) throws ValidationException {
+    public List<User> getFriends(@PathVariable @Valid long userId) throws NotFoundException {
         return userService.getFriends(userId);
     }
 
     @GetMapping("/{userId}/friends/common/{otherId}")
-    public List<User> getCommonFriends(@PathVariable long userId, @PathVariable long otherId) throws ValidationException {
+    public List<User> getCommonFriends(@PathVariable long userId, @PathVariable long otherId) throws NotFoundException {
         return userService.getCommonFriends(userId, otherId);
     }
 }

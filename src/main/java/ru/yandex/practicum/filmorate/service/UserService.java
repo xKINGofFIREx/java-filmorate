@@ -1,10 +1,12 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
@@ -15,19 +17,19 @@ public class UserService {
     private final UserStorage userStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
     public List<User> findAll() {
-        return ((InMemoryUserStorage) userStorage).findAll();
+        return ((UserDbStorage) userStorage).findAll();
     }
 
     public User create(User user) {
         return userStorage.create(user);
     }
 
-    public User update(User user) throws ValidationException {
+    public User update(User user) throws NotFoundException {
         return userStorage.update(user);
     }
 
@@ -35,50 +37,42 @@ public class UserService {
         userStorage.delete(userId);
     }
 
-    public void addFriend(long userId, long friendId) throws ValidationException {
-        User user = ((InMemoryUserStorage) userStorage).getUser(userId);
-        User friend = ((InMemoryUserStorage) userStorage).getUser(friendId);
-
-        user.addFriend(friendId);
-        friend.addFriend(userId);
+    public void addFriend(long userId, long friendId) throws NotFoundException {
+        ((UserDbStorage) userStorage).addFriend(userId, friendId);
     }
 
     public void removeFriend(long userId, long friendId) throws ValidationException {
-        User user = ((InMemoryUserStorage) userStorage).getUser(userId);
-        User friend = ((InMemoryUserStorage) userStorage).getUser(friendId);
-
-        user.removeFriend(friendId);
-        friend.removeFriend(userId);
+        ((UserDbStorage) userStorage).removeFriend(userId, friendId);
     }
 
-    public List<User> getFriends(long userId) throws ValidationException {
-        User user = ((InMemoryUserStorage) userStorage).getUser(userId);
+    public List<User> getFriends(long userId) throws NotFoundException {
+        User user = getUserById(userId);
         List<Long> friendsIds = new ArrayList<>(user.getFriends());
         List<User> friends = new ArrayList<>();
 
         for (long id : friendsIds) {
-            friends.add(((InMemoryUserStorage) userStorage).getUser(id));
+            friends.add(getUserById(id));
         }
 
         return friends;
     }
 
-    public List<User> getCommonFriends(long userId, long otherId) throws ValidationException {
-        User user = ((InMemoryUserStorage) userStorage).getUser(userId);
-        User friend = ((InMemoryUserStorage) userStorage).getUser(otherId);
+    public List<User> getCommonFriends(long userId, long otherId) throws NotFoundException {
+        User user = getUserById(userId);
+        User friend = getUserById(otherId);
 
         List<User> commonFriends = new ArrayList<>();
 
         for (long id : user.getFriends()) {
             if (friend.getFriends().contains(id)) {
-                commonFriends.add(((InMemoryUserStorage) userStorage).getUser(id));
+                commonFriends.add(getUserById(id));
             }
         }
 
         return commonFriends;
     }
 
-    public User getUserById(long userId) throws ValidationException {
-        return ((InMemoryUserStorage) userStorage).getUser(userId);
+    public User getUserById(long userId) throws NotFoundException {
+        return ((UserDbStorage) userStorage).getUser(userId);
     }
 }

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.Email;
@@ -13,10 +14,11 @@ import java.util.Map;
 import java.util.Set;
 
 @Data
+@Builder
 public class User {
 
     private final Set<Long> friends = new HashSet<>();
-    private long id = 1;
+    private long id;
     private final Map<Long, Boolean> friendshipStatus = new HashMap<>();
 
     @Email
@@ -28,7 +30,7 @@ public class User {
     private String login;
 
     @NotNull
-    private String name = "";
+    private String name;
 
     @NotNull
     @Past
